@@ -1,0 +1,10 @@
+Flask==3.0.0
+openai
+Flask-SQLAlchemy
+Flask-Login
+static-ffmpeg
+numpy
+yt-dlp
+pydub
+supabase
+requests

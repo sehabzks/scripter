@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kayıt Ol — SesliÇevir</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div class="container auth-container">
+        <div class="card auth-card">
+            <header>
+                <div class="logo" style="justify-content: center;">
+                    <div class="logo-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+                    <h1>Sesli<span>Çevir</span></h1>
+                </div>
+                <p class="subtitle">Yeni hediye kredili hesabınızı oluşturun</p>
+            </header>
+
+            {% if error %}
+            <div class="alert"
+                style="color: #ef4444; text-align: center; margin: 1rem 0; background: rgba(239, 68, 68, 0.1); padding: 0.75rem; border-radius: 8px;">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form">
+                <div class="form-group">
+                    <label>E-Posta</label>
+                    <input type="email" name="email" required placeholder="ornek@mail.com">
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" name="password" required placeholder="••••••••" minlength="6">
+                </div>
+                <button type="submit" class="btn btn-filepath" style="width: 100%; margin-top: 1rem;">Kayıt Ol</button>
+            </form>
+            
+            <div class="auth-divider">
+                <span>veya</span>
+            </div>
+
+            <a href="{{ url_for('auth.google_login') }}" class="btn btn-google" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 0.5rem; background: #fff; color: #333; border: 1px solid #ddd; padding: 0.75rem; border-radius: 8px; text-decoration: none; font-weight: 500; transition: all 0.3s ease;">
+                <img src="https://fonts.gstatic.com/s/i/productlogos/googleg/v6/24px.svg" alt="Google" style="width: 20px; height: 20px;">
+                Google ile Kayıt Ol
+            </a>
+
+            <div class="auth-links" style="text-align: center; margin-top: 1.5rem; font-size: 0.9rem;">
+                <p style="color: var(--muted);">Zaten hesabın var mı? <a href="{{ url_for('auth.login') }}"
+                        style="color: var(--primary); text-decoration: none; font-weight: 600;">Giriş Yap</a></p>
+            </div>
+        </div>
+    </div>
+    <style>
+        .auth-divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: var(--muted);
+            margin: 1.5rem 0;
+            font-size: 0.85rem;
+        }
+        .auth-divider::before,
+        .auth-divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .auth-divider span {
+            padding: 0 10px;
+        }
+        .btn-google:hover {
+            background: #f8f9fa !important;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+    </style>
+</body>
+
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SesliÇevir — AI Transkripsiyon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="top-bar">
+            <div class="nav-links" style="display:flex;gap:0.75rem;">
+                <a href="{{ url_for('history.transcription_history') }}" class="nav-link"><i class="fa-solid fa-clock-rotate-left"></i> Geçmiş Çeviriler</a>
+                <a href="{{ url_for('history.payment_history') }}" class="nav-link"><i class="fa-solid fa-receipt"></i> Ödeme Geçmişi</a>
+            </div>
+            <div id="creditBadge" class="user-badge {% if not is_unlimited and credits_seconds <= 0 %}danger{% endif %}">
+                <i class="fa-solid fa-coins"></i>
+                <span id="creditText">
+                    {% if is_unlimited %}
+                        Sınırsız Kredi
+                    {% else %}
+                        {{ credits_seconds // 60 }} Dk {{ credits_seconds % 60 }} Sn Kredi
+                    {% endif %}
+                </span>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="btn-logout"><i class="fa-solid fa-arrow-right-from-bracket"></i>
+                Çıkış Yap</a>
+        </div>
+        <header>
+            <div class="logo">
+                <div class="logo-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+                <h1>Sesli<span>Çevir</span></h1>
+            </div>
+            <p class="subtitle">Yapay zeka ile ses ve videoyu metne dönüştürün</p>
+        </header>
+
+        <main>
+            <!-- Sol: Kontrol Paneli -->
+            <div class="card recorder-card">
+
+
+
+                <!-- Kaynak Sekmeleri -->
+                <div class="input-tabs">
+                    <button class="tab-btn active" data-tab="filepath-tab">
+                        <i class="fa-solid fa-folder-open"></i> Dosya Yükle
+                    </button>
+                    <button class="tab-btn" data-tab="youtube-tab">
+                        <i class="fa-brands fa-youtube"></i> YouTube
+                    </button>
+                </div>
+
+
+
+                <!-- Dosya Seçimi -->
+                <div id="filepath-tab" class="tab-content active" style="display: block;">
+                    <div class="youtube-container">
+                        <label class="file-drop-label" id="fileDropLabel">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <span id="fileDropText">Dosya Seçmek İçin Tıkla</span>
+                            <small class="filepath-hint">MP4, MKV, AVI, MOV, WAV, MP3 • Süre sınırı yok</small>
+                            <input type="file" id="filepathInput"
+                                accept=".mp4,.mkv,.avi,.mov,.wmv,.flv,.webm,.m4v,.mp3,.wav,.ogg,.flac,.m4a"
+                                style="display:none">
+                        </label>
+                        <button id="filepathBtn" class="btn btn-filepath">
+                            <i class="fa-solid fa-waveform-lines"></i>
+                            <span>Seçili Dosyayı Çevir</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- YouTube -->
+                <div id="youtube-tab" class="tab-content" style="display: none;">
+                    <div class="youtube-container">
+                        <div class="input-with-icon">
+                            <i class="fa-brands fa-youtube input-icon"></i>
+                            <input type="text" id="youtubeUrl" placeholder="YouTube video bağlantısını yapıştırın..."
+                                autocomplete="off">
+                        </div>
+                        <button id="youtubeBtn" class="btn btn-yt">
+                            <i class="fa-solid fa-download"></i>
+                            <span>İndir ve Çevir</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ: Sonuç Paneli -->
+            <div class="card result-card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-align-left"></i> Transkripsiyon</h2>
+                    <div class="actions">
+                        <button id="copyBtn" class="icon-btn" title="Kopyala">
+                            <i class="fa-regular fa-copy"></i>
+                        </button>
+                        <button id="downloadSrtBtn" class="icon-btn srt-btn" title="SRT Altyazı İndir" disabled>
+                            <i class="fa-solid fa-closed-captioning"></i>
+                            <span class="srt-label">SRT</span>
+                        </button>
+                        <button id="clearBtn" class="icon-btn" title="Temizle">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- İstatistik çubuğu -->
+                <div class="stats-bar" id="statsBar" style="display:none">
+                    <span id="statWords"><i class="fa-solid fa-font"></i> — kelime</span>
+                    <span id="statChars"><i class="fa-solid fa-keyboard"></i> — karakter</span>
+                    <span id="statChunks"><i class="fa-solid fa-closed-captioning"></i> — segment</span>
+                </div>
+
+                <div class="result-area">
+                    <textarea id="resultText" placeholder="Transkripsiyon burada görünecek..." readonly></textarea>
+                    <div class="loading-overlay" id="loadingOverlay">
+                        <div class="spinner"></div>
+                        <p>Dönüştürülüyor...</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>Powered by <strong>Whisper API</strong> · <strong>Flask</strong></p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+
+</html>

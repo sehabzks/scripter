@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Çeviri Geçmişi — SesliÇevir</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .history-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .history-header a {
+            color: var(--muted);
+            text-decoration: none;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.2s;
+        }
+        .history-header a:hover { color: var(--primary); }
+        .history-list { display: flex; flex-direction: column; gap: 1rem; }
+        .history-item {
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px;
+            padding: 1.25rem 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 0.75rem;
+        }
+        .history-item .source {
+            font-size: 0.85rem;
+            color: var(--muted);
+            margin-bottom: 0.4rem;
+            word-break: break-all;
+        }
+        .history-item .source i { margin-right: 0.4rem; color: var(--primary); }
+        .history-item .preview {
+            font-size: 0.95rem;
+            color: var(--text);
+            line-height: 1.6;
+            max-height: 3.2em;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+        .history-item .preview.expanded {
+            max-height: 2000px;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: var(--primary);
+            cursor: pointer;
+            font-size: 0.82rem;
+            font-family: inherit;
+            font-weight: 600;
+            padding: 0.2rem 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            margin-top: 0.3rem;
+            opacity: 0.85;
+            transition: opacity 0.2s;
+        }
+        .toggle-btn:hover { opacity: 1; }
+        .history-item .meta {
+            text-align: right;
+            font-size: 0.8rem;
+            color: var(--muted);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 0.3rem;
+            white-space: nowrap;
+        }
+        .duration-badge {
+            background: rgba(139,92,246,0.15);
+            color: var(--primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 1rem; opacity: 0.4; }
+        .empty-state p { font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+    <div class="container">
+        <div class="history-header">
+            <a href="{{ url_for('main.index') }}"><i class="fa-solid fa-arrow-left"></i> Ana Sayfaya Dön</a>
+        </div>
+        <div class="card" style="padding: 2rem;">
+            <h2 style="margin-bottom: 1.5rem;"><i class="fa-solid fa-clock-rotate-left" style="color: var(--primary); margin-right: 0.5rem;"></i>Çeviri Geçmişi</h2>
+            
+            {% if transcriptions %}
+            <div class="history-list">
+                {% for t in transcriptions %}
+                <div class="history-item">
+                    <div>
+                        <div class="source">
+                            {% if 'youtu' in (t.filename_or_url or '') %}
+                                <i class="fa-brands fa-youtube"></i>
+                            {% else %}
+                                <i class="fa-solid fa-file-audio"></i>
+                            {% endif %}
+                            {{ t.filename_or_url or 'Bilinmeyen Kaynak' }}
+                        </div>
+                        <div class="preview" id="preview-{{ loop.index }}">{{ t.transcribed_text }}</div>
+                        <div style="display:flex; gap: 0.75rem; align-items: center; margin-top:0.4rem; flex-wrap:wrap;">
+                            <button class="toggle-btn" onclick="togglePreview('preview-{{ loop.index }}', this)">
+                                <i class="fa-solid fa-chevron-down"></i> Tamamını Göster
+                            </button>
+                            <button class="toggle-btn" onclick="copyText('preview-{{ loop.index }}', this)" style="color: var(--success);">
+                                <i class="fa-regular fa-copy"></i> Kopyala
+                            </button>
+                            <button class="toggle-btn srt-history-btn" 
+                                    data-preview-id="preview-{{ loop.index }}"
+                                    data-filename="{{ t.filename_or_url }}"
+                                    data-duration="{{ t.duration_seconds }}"
+                                    data-chunks='{{ t.chunks_json | default("[]") }}'
+                                    style="color: #a78bfa;">
+                                <i class="fa-solid fa-closed-captioning"></i> SRT İndir
+                            </button>
+                        </div>
+                    </div>
+                    <div class="meta">
+                        <span class="duration-badge"><i class="fa-solid fa-clock" style="margin-right:0.3rem;"></i>{{ t.duration_seconds // 60 }}:{{ '%02d' % (t.duration_seconds % 60) }}</span>
+                        <span>{{ t.created_at[:10] if t.created_at else '-' }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="fa-solid fa-scroll"></i>
+                <p>Henüz hiç çeviri yapmadınız.</p>
+                <a href="{{ url_for('main.index') }}" class="btn btn-primary" style="display: inline-block; margin-top: 1.5rem;">İlk Çevirinizi Yapın</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        function togglePreview(id, btn) {
+            const el = document.getElementById(id);
+            const isExpanded = el.classList.toggle('expanded');
+            btn.innerHTML = isExpanded
+                ? '<i class="fa-solid fa-chevron-up"></i> Gizle'
+                : '<i class="fa-solid fa-chevron-down"></i> Tamamını Göster';
+        }
+
+        function copyText(id, btn) {
+            const text = document.getElementById(id).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const original = btn.innerHTML;
+                btn.innerHTML = '<i class="fa-solid fa-check"></i> Kopyalandı!';
+                setTimeout(() => btn.innerHTML = original, 2000);
+            });
+        }
+
+        function downloadSrt(id, filename, durationSec, chunksJson) {
+            const fullText = document.getElementById(id).textContent.trim();
+            if (!fullText) return;
+
+            const fmt = s => {
+                const h = String(Math.floor(s / 3600)).padStart(2, '0');
+                const m = String(Math.floor((s % 3600) / 60)).padStart(2, '0');
+                const sec = String(Math.floor(s % 60)).padStart(2, '00');
+                const ms = String(Math.round((s - Math.floor(s)) * 1000)).padStart(3, '0');
+                return `${h}:${m}:${sec},${ms}`;
+            };
+
+            let srt = '';
+            let chunks = [];
+            try { chunks = JSON.parse(chunksJson || '[]'); } catch(e) { chunks = []; }
+
+            if (chunks.length > 0) {
+                // Use real timestamps from the database
+                chunks.filter(c => c.text && c.text.trim()).forEach((c, i) => {
+                    srt += `${i + 1}\n${fmt(c.start)} --> ${fmt(c.end)}\n${c.text.trim()}\n\n`;
+                });
+            } else {
+                // Fallback: single segment
+                srt = `1\n00:00:00,000 --> ${fmt(durationSec)}\n${fullText}\n\n`;
+            }
+
+            const blob = new Blob([srt], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = (filename || 'ceviri').replace(/[\/\\:*?"<>|]/g, '_').substring(0, 60) + '.srt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // SRT butonlarına event delegation ile bağla
+        document.addEventListener('click', function(e) {
+            const btn = e.target.closest('.srt-history-btn');
+            if (!btn) return;
+            downloadSrt(
+                btn.dataset.previewId,
+                btn.dataset.filename,
+                parseInt(btn.dataset.duration),
+                btn.dataset.chunks
+            );
+        });
+    </script>
+</body>
+</html>
+

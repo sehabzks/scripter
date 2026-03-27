@@ -1,0 +1,18 @@
+Checking path: D:\AI_Models_Lite\wav2vec2-turkish
+Path exists. Contents:
+ - .cache
+ - .gitattributes
+ - config.json
+ - preprocessor_config.json
+ - README.md
+ - special_tokens_map.json
+ - tokenizer_config.json
+ - vocab.json
+
+Attempting to load processor...
+C:\Users\seha2\AppData\Local\Programs\Python\Python313\Lib\site-packages\transformers\configuration_utils.py:335: UserWarning: Passing `gradient_checkpointing` to a config initialization is deprecated and will be removed in v5 Transformers. Using `model.gradient_checkpointing_enable()` instead, or if you are using the `Trainer` API, pass `gradient_checkpointing=True` in your `TrainingArguments`.
+  warnings.warn(
+Processor loaded successfully.
+
+Attempting to load model...
+FAILED to load model: Error no file named pytorch_model.bin, model.safetensors, tf_model.h5, model.ckpt.index or flax_model.msgpack found in directory D:\AI_Models_Lite\wav2vec2-turkish.
