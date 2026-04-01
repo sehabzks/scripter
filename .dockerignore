@@ -1,0 +1,30 @@
+# Gizli dosyalar
+.env
+
+# Sanal ortamlar
+venv/
+venv2/
+env/
+
+# Python önbellek dosyaları
+__pycache__/
+*.pyc
+*.pyo
+
+# Kullanıcı indirmeleri (Gereksiz ağırlık yapmasın)
+uploads/
+
+# IDE ve Git kalıntıları
+.git/
+.gitignore
+.idea/
+.vscode/
+sesTanıma.code-workspace
+
+# Loglar ve gereksiz metinler
+*.log
+debug_log.txt
+yt_dlp_debug.txt
+implementation_plan.md
+task.md
+walkthrough.md

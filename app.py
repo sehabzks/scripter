@@ -1,11 +1,10 @@
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from flask import Flask
 from config import Config
-import static_ffmpeg
-
-# Auto-install/load ffmpeg binary
-static_ffmpeg.add_paths()
-
 app = Flask(__name__)
 app.config.from_object(Config)
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

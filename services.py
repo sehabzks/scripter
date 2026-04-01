@@ -4,8 +4,7 @@ import subprocess
 import time
 import yt_dlp
 from pydub import AudioSegment
-import static_ffmpeg
-static_ffmpeg.add_paths()
+
 from supabase import create_client
 from huggingface_hub import InferenceClient
 from config import Config
