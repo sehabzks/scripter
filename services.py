@@ -137,7 +137,7 @@ def download_youtube_audio(url):
         'extractor_retries': 3,
     }
 
-    cookies_txt = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cookies.txt')
+    cookies_txt = os.path.join(os.path.dirname(__file__), 'cookies.txt')
     attempts = []
     if os.path.exists(cookies_txt):
         attempts.append(('cookies.txt', {'cookiefile': cookies_txt}))
