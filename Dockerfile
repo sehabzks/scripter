@@ -1,5 +1,5 @@
 # Resmi, hafif bir Python sürümü seçiyoruz
-FROM python:3.11-slim
+FROM python:3.13-slim
 
 # Uygulamanın çalışacağı klasörü ayarlıyoruz
 WORKDIR /app
